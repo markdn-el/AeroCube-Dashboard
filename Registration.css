@@ -66,8 +66,7 @@ body {
   letter-spacing: 0.03em;
 }
 
-.auth-form input,
-.auth-form select {
+.auth-form input {
   background: #0d131d;
   border: 1px solid #233147;
   color: #f8fafc;
@@ -78,10 +77,47 @@ body {
   transition: border-color 0.2s;
 }
 
-.auth-form input:focus,
-.auth-form select:focus {
+.auth-form input:focus {
   border-color: #38bdf8;
 }
+
+/* --- EYE ICON WRAPPER & BUTTON FIX --- */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 40px; /* Creates room inside the box for the icon */
+}
+
+/* Targets both toggle buttons by class name and specific IDs */
+.toggle-password,
+#toggle-password-btn,
+#toggle-confirm-btn {
+  position: absolute;
+  right: 12px;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  cursor: pointer;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-password:hover,
+#toggle-password-btn:hover,
+#toggle-confirm-btn:hover {
+  color: #ffffff;
+}
+/* ------------------------------------ */
 
 .auth-error {
   color: #ef4444;

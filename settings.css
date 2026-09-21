@@ -117,7 +117,7 @@ body {
     box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
 }
 
-/* === SETTINGS WRAPPER (FIT-TO-SCREEN CONTAINER) === */
+/* === SETTINGS WRAPPER === */
 .settings-wrapper {
     flex-grow: 1;
     height: 100vh;
@@ -399,14 +399,13 @@ svg {
     stroke-linejoin: round; 
 }
 
-/* === MOBILE RESPONSIVENESS & SIDEBAR DRAWER (< 768px) === */
+/* === MOBILE RESPONSIVENESS (< 768px) === */
 @media screen and (max-width: 768px) {
     body {
         flex-direction: column;
         overflow: auto;
     }
 
-    /* Top bar with hamburger toggle */
     .mobile-top-bar {
         display: flex;
         align-items: center;
@@ -419,7 +418,6 @@ svg {
         z-index: 998;
     }
 
-    /* Transform Sidebar into an Off-Screen Drawer */
     .sidebar {
         position: fixed;
         top: 0;
@@ -442,7 +440,6 @@ svg {
         display: block;
     }
 
-    /* Align items inside the mobile drawer */
     .sidebar-top-group {
         align-items: flex-start;
         gap: 12px;
@@ -462,7 +459,6 @@ svg {
         font-weight: 600;
     }
 
-    /* Responsive Wrapper Layout */
     .settings-wrapper {
         height: auto;
         padding: 16px;

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aerocube Portal - Register</title>
-  <link rel="stylesheet" href="Login.css" /> 
+  <link rel="stylesheet" href="Registration.css" /> 
   <!-- Include Lucide Icons for the eye symbols -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
@@ -51,7 +51,7 @@
         </div>
 
         <div class="form-group">
-          <label for="register-password">Password (Exactly 6 characters)</label>
+          <label for="register-password">Password (MAXIMUM OF 6)</label>
           <div class="password-wrapper">
             <input type="password" id="register-password" placeholder="Create a password" required minlength="6" maxlength="6" />
             <button type="button" class="toggle-password" id="toggle-password-btn">
@@ -64,20 +64,10 @@
           <label for="register-confirm">Confirm Password</label>
           <div class="password-wrapper">
             <input type="password" id="register-confirm" placeholder="Type password again" required minlength="6" maxlength="6" />
-            <button type="button" class="toggle-password" id="toggle-confirm-btn">
+            <button type="button" class="toggle-confirm-btn" id="toggle-confirm-btn">
               <i data-lucide="eye" id="eye-icon-2" style="width: 18px; height: 18px;"></i>
             </button>
           </div>
-        </div>
-
-        <!-- Role Selection Dropdown -->
-        <div class="form-group">
-          <label for="register-role">Account Role</label>
-          <select id="register-role" required style="width: 100%; padding: 10px; background: #182232; border: 1px solid #233147; color: #fff; border-radius: 6px;">
-            <option value="" disabled selected>Select your access level</option>
-            <option value="viewer">Viewer (Viewing Only)</option>
-            <option value="admin">Admin (Full Access Control)</option>
-          </select>
         </div>
 
         <!-- Error messages will appear here -->

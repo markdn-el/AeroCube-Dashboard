@@ -4,7 +4,7 @@ import { getAuth, createUserWithEmailAndPassword, signOut } from "https://www.gs
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// Your exact web app's Firebase configuration
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBQP8psXqOg-yb1eQDXzONoEXV1CnIUAp0",
   authDomain: "aerocube-db.firebaseapp.com",
@@ -27,7 +27,6 @@ const formRegister = document.getElementById('form-register');
 const registerEmail = document.getElementById('register-email');
 const registerPassword = document.getElementById('register-password');
 const registerConfirm = document.getElementById('register-confirm');
-const registerRole = document.getElementById('register-role');
 const registerError = document.getElementById('register-error');
 
 // Password Visibility Toggle Elements
@@ -40,7 +39,6 @@ if (togglePasswordBtn) {
     const type = registerPassword.getAttribute('type') === 'password' ? 'text' : 'password';
     registerPassword.setAttribute('type', type);
     
-    // Switch icon visual (optional enhancement)
     togglePasswordBtn.innerHTML = type === 'text' 
       ? '<i data-lucide="eye-off" style="width: 18px; height: 18px;"></i>' 
       : '<i data-lucide="eye" style="width: 18px; height: 18px;"></i>';
@@ -70,16 +68,10 @@ formRegister.addEventListener('submit', async (e) => {
   const email = registerEmail.value.trim();
   const password = registerPassword.value;
   const confirmPassword = registerConfirm.value;
-  const role = registerRole.value;
 
   if (password !== confirmPassword) {
       registerError.innerText = "Passwords do not match.";
       return; 
-  }
-
-  if (!role) {
-      registerError.innerText = "Please select an account role.";
-      return;
   }
 
   try {
@@ -87,10 +79,10 @@ formRegister.addEventListener('submit', async (e) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // 2. Save the user's role in the Realtime Database under /users/{uid}
+    // 2. Save user metadata in Realtime Database under /users/{uid}
     await set(ref(db, 'users/' + user.uid), {
       email: email,
-      role: role 
+      createdAt: new Date().toISOString()
     });
 
     // 3. Sign the user out immediately so they have to manually log in
@@ -106,7 +98,7 @@ formRegister.addEventListener('submit', async (e) => {
         if (err.code === 'auth/email-already-in-use') {
             registerError.innerText = "An account with this email already exists.";
         } else if (err.code === 'auth/weak-password') {
-            registerError.innerText = "Password must be exactly 6 characters.";
+            registerError.innerText = "Password must be at least 6 characters.";
         } else {
             registerError.innerText = "Error: " + err.message; 
         }

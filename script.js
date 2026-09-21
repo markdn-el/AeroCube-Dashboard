@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -48,55 +48,15 @@ const insightText = document.getElementById('insight-text');
 const recommendationText = document.getElementById('recommendation-text');
 const btnLogout = document.getElementById('btn-logout');
 
-// Flag to track if the current user is a viewer
-let isViewerUser = false;
+// User Display Element (Add <div id="users-container"></div> in your HTML)
+const usersContainer = document.getElementById('users-container');
 
-// --- AUTHENTICATION & ROLE VERIFICATION ---
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    try {
-      const userRef = ref(db, 'users/' + user.uid);
-      const snapshot = await get(userRef);
-      
-      if (snapshot.exists()) {
-        const userData = snapshot.val();
-        console.log("Logged in user role:", userData.role);
-
-        if (userData.role === 'viewer') {
-          isViewerUser = true;
-          lockControlsForViewer();
-        }
-      }
-    } catch (err) {
-      console.error("Error checking user role:", err);
-    }
-  } else {
+// --- AUTHENTICATION CHECK ---
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
     window.location.href = 'Registration.html';
   }
 });
-
-function lockControlsForViewer() {
-  const headerTitle = document.querySelector('.header-title');
-  if (headerTitle) {
-    const badge = document.createElement('div');
-    badge.style.display = 'inline-block';
-    badge.style.background = 'rgba(234, 179, 8, 0.1)';
-    badge.style.border = '1px solid rgba(234, 179, 8, 0.3)';
-    badge.style.color = '#eab308';
-    badge.style.padding = '2px 8px';
-    badge.style.borderRadius = '4px';
-    badge.style.fontSize = '0.75rem';
-    badge.style.marginLeft = '10px';
-    badge.style.verticalAlign = 'middle';
-    badge.innerText = 'READ-ONLY VIEWER MODE';
-    headerTitle.appendChild(badge);
-  }
-
-  const controlCenter = document.querySelector('.control-center');
-  if (controlCenter) {
-    controlCenter.style.opacity = '0.8';
-  }
-}
 
 // --- LOGOUT FUNCTIONALITY ---
 if (btnLogout) {
@@ -108,6 +68,32 @@ if (btnLogout) {
     } catch (err) {
       console.error("Logout error:", err);
     }
+  });
+}
+
+// --- FETCH & DISPLAY USERS FROM FIREBASE REALTIME DATABASE ---
+if (usersContainer) {
+  onValue(ref(db, 'users'), (snapshot) => {
+    const usersData = snapshot.val();
+    
+    if (!usersData) {
+      usersContainer.innerHTML = '<p style="color: #64748b;">No registered users found.</p>';
+      return;
+    }
+
+    let html = '';
+    Object.keys(usersData).forEach((uid) => {
+      const user = usersData[uid];
+      html += `
+        <div class="user-item" style="background: #182232; border: 1px solid #233147; padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+          <p style="margin: 0; color: #f8fafc; font-size: 0.85rem;"><strong>Email:</strong> ${user.email || 'N/A'}</p>
+          ${user.password ? `<p style="margin: 4px 0 0; color: #38bdf8; font-size: 0.85rem;"><strong>Password:</strong> ${user.password}</p>` : ''}
+          <p style="margin: 4px 0 0; color: #64748b; font-size: 0.75rem;"><strong>UID:</strong> ${uid}</p>
+        </div>
+      `;
+    });
+
+    usersContainer.innerHTML = html;
   });
 }
 
@@ -334,29 +320,17 @@ onValue(ref(db, `${BASE_PATH}/controls`), (snapshot) => {
   const controls = snapshot.val();
   if (!controls) return;
 
-  if (isViewerUser) {
-    if (btnAuto) btnAuto.disabled = true;
-    if (btnManual) btnManual.disabled = true;
-    if (switchRelay1) switchRelay1.disabled = true;
-    if (switchRelay2) switchRelay2.disabled = true;
-    if (switchSilent) switchSilent.disabled = true;
-  } else {
-    if(switchRelay1) switchRelay1.disabled = false;
-    if(switchRelay2) switchRelay2.disabled = false;
-    if(switchSilent) switchSilent.disabled = false;
-
-    if (controls.isAutoMode !== undefined) {
-      if (controls.isAutoMode) {
-        if(btnAuto) btnAuto.classList.add('active');
-        if(btnManual) btnManual.classList.remove('active');
-        if(switchRelay1) switchRelay1.disabled = true;
-        if(switchRelay2) switchRelay2.disabled = true;
-      } else {
-        if(btnManual) btnManual.classList.add('active');
-        if(btnAuto) btnAuto.classList.remove('active');
-        if(switchRelay1) switchRelay1.disabled = false;
-        if(switchRelay2) switchRelay2.disabled = false;
-      }
+  if (controls.isAutoMode !== undefined) {
+    if (controls.isAutoMode) {
+      if(btnAuto) btnAuto.classList.add('active');
+      if(btnManual) btnManual.classList.remove('active');
+      if(switchRelay1) switchRelay1.disabled = true;
+      if(switchRelay2) switchRelay2.disabled = true;
+    } else {
+      if(btnManual) btnManual.classList.add('active');
+      if(btnAuto) btnAuto.classList.remove('active');
+      if(switchRelay1) switchRelay1.disabled = false;
+      if(switchRelay2) switchRelay2.disabled = false;
     }
   }
 
@@ -376,12 +350,8 @@ onValue(ref(db, `${BASE_PATH}/controls`), (snapshot) => {
   }
 });
 
-// 3. Dispatch Controls back to Firebase (Blocked if Viewer)
+// 3. Dispatch Controls back to Firebase
 function updateControls(newPartialState) {
-  if (isViewerUser) {
-    alert("Access Denied: Viewer accounts have read-only permissions and cannot modify controls.");
-    return;
-  }
   update(ref(db, `${BASE_PATH}/controls`), newPartialState);
 }
 

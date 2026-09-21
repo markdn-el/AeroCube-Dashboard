@@ -30,7 +30,7 @@ const selectPm = document.getElementById('select-pm');
 
 // Buttons
 const btnSave = document.getElementById('btn-save');
-const btnRecal = document.getElementById('btn-recal');
+const btnSps30Clean = document.getElementById('btn-sps30clean');
 
 // --- 1. FETCH LIVE SETTINGS FROM FIREBASE ---
 onValue(ref(db, `${BASE_PATH}/settings`), (snapshot) => {
@@ -107,15 +107,24 @@ btnSave.addEventListener('click', () => {
         });
 });
 
-// --- 4. RECALIBRATION BUTTON COMMAND ---
-btnRecal.addEventListener('click', () => {
-    const originalText = btnRecal.innerHTML;
-    btnRecal.innerText = "Sending Command...";
+// --- 4. SPS30 FAN CLEANING COMMAND ---
+btnSps30Clean.addEventListener('click', () => {
+    const originalText = btnSps30Clean.innerHTML;
+    btnSps30Clean.innerText = "Cleaning Started...";
+    btnSps30Clean.style.opacity = "0.7";
     
-    update(ref(db, `${BASE_PATH}/controls`), { triggerRecalibration: true })
+    // Sets sps30Clean trigger in Realtime Database under /settings
+    update(ref(db, `${BASE_PATH}/settings`), { sps30Clean: true })
         .then(() => {
-            btnRecal.innerText = "Recalibrating...";
-            setTimeout(() => { btnRecal.innerHTML = originalText; }, 3000);
+            btnSps30Clean.innerText = "Cleaning Triggered! ✓";
+            btnSps30Clean.style.opacity = "1";
+            setTimeout(() => { btnSps30Clean.innerHTML = originalText; }, 3000);
+        })
+        .catch((error) => {
+            console.error("Error triggering SPS30 fan clean: ", error);
+            btnSps30Clean.innerText = "Error Triggering!";
+            btnSps30Clean.style.opacity = "1";
+            setTimeout(() => { btnSps30Clean.innerHTML = originalText; }, 3000);
         });
 });
 
